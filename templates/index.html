@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Python RAG Asistanı</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1b4b, #4c1d95, #7e22ce);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chat-container {
+    width: 480px;
+    height: 640px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  .chat-header h1 { font-size: 18px; }
+  .chat-header p { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+  .chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f7fc;
+  }
+  .msg {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    align-self: flex-start;
+    background: #ece9f4;
+    color: #2d2a3d;
+    border-bottom-left-radius: 4px;
+  }
+  .msg.bot .score {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #8b8496;
+  }
+  .chat-input {
+    display: flex;
+    padding: 14px;
+    border-top: 1px solid #eee;
+    background: white;
+  }
+  .chat-input input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    outline: none;
+  }
+  .chat-input input:focus { border-color: #a855f7; }
+  .chat-input button {
+    margin-left: 8px;
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .typing { font-size: 13px; color: #999; font-style: italic; padding: 4px 14px; }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <h1>🐍 Python RAG Asistanı</h1>
+    <p>Foundry Local ile yerel çalışan yapay zeka</p>
+  </div>
+  <div class="chat-messages" id="messages">
+    <div class="msg bot">Merhaba! Python hakkında bana soru sorabilirsin.</div>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="input" placeholder="Bir soru yaz..." autocomplete="off">
+    <button id="sendBtn" onclick="sendMessage()">Gönder</button>
+  </div>
+</div>
+
+<script>
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+
+function addMessage(text, sender, score) {
+  const div = document.createElement("div");
+  div.className = "msg " + sender;
+  div.textContent = text;
+  if (sender === "bot" && score !== undefined) {
+    const scoreSpan = document.createElement("span");
+    scoreSpan.className = "score";
+    scoreSpan.textContent = "benzerlik skoru: " + score;
+    div.appendChild(scoreSpan);
+  }
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+  sendBtn.disabled = true;
+
+  const typing = document.createElement("div");
+  typing.className = "typing";
+  typing.id = "typingIndicator";
+  typing.textContent = "Yazıyor...";
+  messagesDiv.appendChild(typing);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    document.getElementById("typingIndicator").remove();
+    addMessage(data.answer, "bot", data.score);
+  } catch (err) {
+    document.getElementById("typingIndicator").remove();
+    addMessage("Bir hata oluştu, sunucuyu kontrol et.", "bot");
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+</script>
+
+</body>
+</html>

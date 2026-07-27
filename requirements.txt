@@ -1,0 +1,2 @@
+flask
+foundry-local-sdk-winml
