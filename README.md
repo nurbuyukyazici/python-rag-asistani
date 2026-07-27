@@ -1,0 +1,174 @@
+\# Python RAG Asistanı
+
+
+
+Microsoft Foundry Local kullanılarak internete bağlanmadan, tamamen yerel çalışan bir RAG (Retrieval-Augmented Generation) chatbot uygulaması. Python programlama dili hakkındaki sorulara, önceden yüklenmiş teknik dökümanlardan doğru bilgi bularak cevap verir.
+
+
+
+\## Özellikler
+
+
+
+\- \*\*Tamamen yerel çalışır\*\* — internet bağlantısı veya bulut API'si gerektirmez
+
+\- \*\*Hibrit arama\*\* — anlamsal (embedding) arama ile anahtar kelime eşleşmesini birleştirir
+
+\- \*\*Extractive yaklaşım\*\* — halüsinasyon riskini ortadan kaldırmak için kaynak paragrafı doğrudan sunar
+
+\- \*\*Web arayüzü\*\* — Flask tabanlı, kullanıcı dostu sohbet ekranı
+
+\- \*\*Benzerlik eşiği\*\* — alakasız sorularda "bilmiyorum" diyerek uydurma bilgi vermez
+
+
+
+\## Mimari
+
+
+
+Kullanıcı Sorusu
+
+|
+
+v
+
+Embedding Modeli (qwen3-embedding-0.6b)
+
+|
+
+v
+
+SQLite Veritabanı (rag.db) — Kosinüs Benzerliği + Anahtar Kelime Eşleşmesi
+
+|
+
+v
+
+En Alakalı Paragraf --> Kullanıcıya Sunulur
+
+
+
+
+
+\## Kurulum
+
+
+
+\### Gereksinimler
+
+\- Python 3.11+
+
+\- \[Microsoft Foundry Local](https://github.com/microsoft/Foundry-Local) (`winget install Microsoft.FoundryLocal`)
+
+
+
+\### Adımlar
+
+
+
+```bash
+
+pip install -r requirements.txt
+
+```
+
+
+
+\## Kullanım
+
+
+
+```bash
+
+python app.py
+
+```
+
+
+
+Sunucu başladıktan sonra tarayıcıda `http://localhost:5000` adresine gidin.
+
+
+
+\## Proje Yapısı
+
+
+
+rag-projesi/
+
+├── app.py # Ana Flask uygulaması
+
+├── requirements.txt # Python bağımlılıkları
+
+├── data/
+
+│ ├── dokumanlar.txt # Kaynak dökümanlar
+
+│ └── rag.db # Embedding'lerin saklandığı veritabanı
+
+├── templates/
+
+│ └── index.html # Web arayüzü
+
+├── evaluation/
+
+│ ├── test\_sorular.py # Sistematik test scripti
+
+│ └── test\_report.md # Test sonuçları raporu
+
+├── src/ # Geliştirme sürecinde kullanılan yardımcı scriptler
+
+└── docs/ # Ek dokümantasyon
+
+
+
+
+
+\## Test Sonuçları
+
+
+
+Detaylı test raporu için \[evaluation/test\_report.md](evaluation/test\_report.md) dosyasına bakın. Özetle: dökümanda bulunan tüm sorular doğru cevaplandı, alakasız sorular doğru şekilde reddedildi.
+
+
+
+\## Geliştirme Süreci
+
+
+
+Bu proje, Microsoft AI Summer School kapsamında Foundry Local kullanılarak adım adım geliştirilmiştir:
+
+
+
+1\. Foundry Local kurulumu ve Python SDK entegrasyonu
+
+2\. SQLite tabanlı embedding veritabanı oluşturma
+
+3\. Kosinüs benzerliği ile retrieval mekanizması
+
+4\. LLM entegrasyonu ve extractive yaklaşıma geçiş
+
+5\. Hibrit arama (embedding + anahtar kelime) ile doğruluk iyileştirmesi
+
+6\. Flask ile web arayüzü geliştirme
+
+7\. Sistematik test ve doğrulama
+
+
+
+\## Kullanılan Teknolojiler
+
+
+
+\- \*\*Microsoft Foundry Local\*\* — yerel model çalıştırma
+
+\- \*\*qwen3-embedding-0.6b\*\* — embedding modeli
+
+\- \*\*Flask\*\* — web sunucusu
+
+\- \*\*SQLite\*\* — veritabanı
+
+
+
+
+
