@@ -1,6 +1,10 @@
 \# Python RAG Asistanı
 
+!\[Tests](https://img.shields.io/badge/tests-8%20passed-brightgreen)
 
+!\[Python](https://img.shields.io/badge/python-3.11%2B-blue)
+
+!\[License](https://img.shields.io/badge/license-MIT-green)
 
 Microsoft Foundry Local kullanılarak internete bağlanmadan, tamamen yerel çalışan bir RAG (Retrieval-Augmented Generation) chatbot uygulaması. Python programlama dili hakkındaki sorulara, önceden yüklenmiş teknik dökümanlardan doğru bilgi bularak cevap verir.
 
@@ -170,5 +174,21 @@ Bu proje, Microsoft AI Summer School kapsamında Foundry Local kullanılarak ad�
 
 
 
+\## Ekran Görüntüleri
 
+
+
+\### Web Arayüzü
+
+
+
+!\[Web Arayüzü](docs/web-arayuzu.png)
+
+
+
+\### Test Sonuçları
+
+
+
+!\[Test Sonuçları](docs/test-sonuclari.png)
 
