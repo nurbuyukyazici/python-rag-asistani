@@ -11,13 +11,13 @@ model.load()
 client = model.get_embedding_client()
 
 # Dosyayı oku ve paragraflara böl (boş satırla ayrılmış her paragraf bir "chunk")
-with open("dokumanlar.txt", "r", encoding="utf-8") as f:
+with open("data/dokumanlar.txt", "r", encoding="utf-8") as f:
     text = f.read()
 
 chunks = [p.strip() for p in text.split("\n\n") if p.strip()]
 print(f"{len(chunks)} paragraf bulundu.")
 
-conn = sqlite3.connect("rag.db")
+conn = sqlite3.connect("data/rag.db")
 cursor = conn.cursor()
 
 # Önceki test verilerini temizle
