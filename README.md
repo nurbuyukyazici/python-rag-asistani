@@ -24,6 +24,8 @@ Microsoft Foundry Local kullanılarak internete bağlanmadan, tamamen yerel çal
 
 \- \*\*Benzerlik eşiği\*\* — alakasız sorularda "bilmiyorum" diyerek uydurma bilgi vermez
 
+\- \*\*Çoklu tur konuşma\*\* — önceki soruları hatırlayarak bağlamsal takip sorularını anlayabilir (ör. "peki ya liste?")
+
 
 
 \## Mimari
