@@ -107,6 +107,7 @@
   <div class="chat-input">
     <input type="text" id="input" placeholder="Bir soru yaz..." autocomplete="off">
     <button id="sendBtn" onclick="sendMessage()">Gönder</button>
+    <button id="exportBtn" onclick="exportChat()" style="margin-left:8px; background:#666;">İndir</button>
   </div>
 </div>
 
@@ -195,7 +196,23 @@ async function sendMessage() {
   sendBtn.disabled = false;
   input.focus();
 }
-
+function exportChat() {
+  const messages = document.querySelectorAll(".msg");
+  let text = "Python RAG Asistani - Sohbet Kaydi\n";
+  text += "=".repeat(40) + "\n\n";
+  messages.forEach(msg => {
+    const sender = msg.classList.contains("user") ? "Kullanici" : "Asistan";
+    const content = msg.childNodes[0].textContent;
+    text += sender + ": " + content + "\n\n";
+  });
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sohbet-kaydi.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });

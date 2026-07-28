@@ -26,6 +26,8 @@ Microsoft Foundry Local kullanılarak internete bağlanmadan, tamamen yerel çal
 
 \- \*\*Çoklu tur konuşma\*\* — önceki soruları hatırlayarak bağlamsal takip sorularını anlayabilir (ör. "peki ya liste?")
 
+\- \*\*Sohbeti dışa aktarma\*\* — konuşmayı .txt dosyası olarak indirebilme
+
 
 
 \## Mimari
