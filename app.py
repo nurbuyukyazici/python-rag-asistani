@@ -29,7 +29,6 @@ def cosine_similarity(a, b):
 
 
 def answer_query(question, history):
-    # Son 2 mesajla birlikte genisletilmis sorgu olustur (baglam icin)
     recent_history = history[-2:] if history else []
     expanded_query = " ".join(recent_history + [question])
 
@@ -55,10 +54,15 @@ def answer_query(question, history):
     best_score = scored[0][0]
 
     if best_score < SIMILARITY_THRESHOLD:
-        return "Bu bilgiyi dokumanlarimda bulamadim.", best_score
+        return "Bu bilgiyi dokumanlarimda bulamadim.", best_score, None
 
     context = scored[0][1]
-    return context, best_score
+    first_sentence = context.split(".")[0].strip()
+    if len(first_sentence) > 60:
+        first_sentence = first_sentence[:60].strip() + "..."
+    source_label = first_sentence.replace("**", "")
+
+    return context, best_score, source_label
 
 
 @app.route("/")
@@ -75,8 +79,8 @@ def chat():
     if not question:
         return jsonify({"answer": "Lutfen bir soru yaz.", "score": 0})
 
-    answer, score = answer_query(question, history)
-    return jsonify({"answer": answer, "score": round(score, 3)})
+    answer, score, source = answer_query(question, history)
+    return jsonify({"answer": answer, "score": round(score, 3), "source": source})
 
 
 if __name__ == "__main__":
