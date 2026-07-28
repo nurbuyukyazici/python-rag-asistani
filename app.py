@@ -5,6 +5,7 @@ import math
 from foundry_local_sdk import Configuration, FoundryLocalManager
 
 SIMILARITY_THRESHOLD = 0.30
+stats = {"total_questions": 0, "answered": 0, "not_found": 0}
 
 app = Flask(__name__)
 
@@ -53,7 +54,10 @@ def answer_query(question, history):
     scored.sort(reverse=True)
     best_score = scored[0][0]
 
+    stats["total_questions"] += 1
+
     if best_score < SIMILARITY_THRESHOLD:
+        stats["not_found"] += 1
         return "Bu bilgiyi dokumanlarimda bulamadim.", best_score, None
 
     context = scored[0][1]
@@ -62,6 +66,7 @@ def answer_query(question, history):
         first_sentence = first_sentence[:60].strip() + "..."
     source_label = first_sentence.replace("**", "")
 
+    stats["answered"] += 1
     return context, best_score, source_label
 
 
@@ -81,6 +86,11 @@ def chat():
 
     answer, score, source = answer_query(question, history)
     return jsonify({"answer": answer, "score": round(score, 3), "source": source})
+
+
+@app.route("/stats")
+def get_stats():
+    return jsonify(stats)
 
 
 if __name__ == "__main__":

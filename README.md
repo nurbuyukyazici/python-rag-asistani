@@ -28,7 +28,7 @@ Microsoft Foundry Local kullanılarak internete bağlanmadan, tamamen yerel çal
 
 \- \*\*Sohbeti dışa aktarma\*\* — konuşmayı .txt dosyası olarak indirebilme
 
-
+\- \*\*Kullanım istatistikleri\*\* — `/stats` endpoint'i ile toplam soru, cevaplanan ve bulunamayan soru sayılarını görüntüleme
 
 \## Mimari
 
