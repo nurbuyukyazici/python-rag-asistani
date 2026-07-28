@@ -28,15 +28,19 @@ def cosine_similarity(a, b):
     return dot / (norm_a * norm_b)
 
 
-def answer_query(question):
-    query_embedding = embed_client.generate_embedding(question).data[0].embedding
+def answer_query(question, history):
+    # Son 2 mesajla birlikte genisletilmis sorgu olustur (baglam icin)
+    recent_history = history[-2:] if history else []
+    expanded_query = " ".join(recent_history + [question])
+
+    query_embedding = embed_client.generate_embedding(expanded_query).data[0].embedding
     conn = sqlite3.connect("data/rag.db")
     cursor = conn.cursor()
     cursor.execute("SELECT content, embedding FROM documents")
     rows = cursor.fetchall()
     conn.close()
 
-    question_words = set(w.lower() for w in question.split() if len(w) > 2)
+    question_words = set(w.lower() for w in expanded_query.split() if len(w) > 2)
 
     scored = []
     for content, embedding_json in rows:
@@ -66,9 +70,12 @@ def home():
 def chat():
     data = request.get_json()
     question = data.get("message", "").strip()
+    history = data.get("history", [])
+
     if not question:
         return jsonify({"answer": "Lutfen bir soru yaz.", "score": 0})
-    answer, score = answer_query(question)
+
+    answer, score = answer_query(question, history)
     return jsonify({"answer": answer, "score": round(score, 3)})
 
 

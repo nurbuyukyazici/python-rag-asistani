@@ -111,6 +111,7 @@
 </div>
 
 <script>
+let conversationHistory = [];
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -144,15 +145,20 @@ async function sendMessage() {
   messagesDiv.appendChild(typing);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-  try {
+try {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ message: text, history: conversationHistory })
     });
     const data = await res.json();
     document.getElementById("typingIndicator").remove();
     addMessage(data.answer, "bot", data.score);
+
+    conversationHistory.push(text);
+    if (conversationHistory.length > 4) {
+      conversationHistory = conversationHistory.slice(-4);
+    }
   } catch (err) {
     document.getElementById("typingIndicator").remove();
     addMessage("Bir hata oluştu, sunucuyu kontrol et.", "bot");
