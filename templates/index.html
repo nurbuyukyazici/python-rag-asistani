@@ -66,6 +66,19 @@
     font-size: 11px;
     color: #8b8496;
   }
+.confidence-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .confidence-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
   .chat-input {
     display: flex;
     padding: 14px;
@@ -167,11 +180,40 @@ function addMessage(text, sender, score, source) {
         sourceSpan.textContent = "Kaynak: " + source;
         div.appendChild(sourceSpan);
       }
-      if (score !== undefined) {
+    if (score !== undefined) {
         const scoreSpan = document.createElement("span");
         scoreSpan.className = "score";
         scoreSpan.textContent = "benzerlik skoru: " + score;
         div.appendChild(scoreSpan);
+
+        const barContainer = document.createElement("div");
+        barContainer.className = "confidence-bar-container";
+        const bar = document.createElement("div");
+        bar.className = "confidence-bar";
+        const percent = Math.min(Math.max(score * 100, 5), 100);
+        bar.style.width = percent + "%";
+        if (score >= 0.7) {
+          bar.style.background = "#22c55e";
+        } else if (score >= 0.4) {
+          bar.style.background = "#eab308";
+        } else {
+          bar.style.background = "#ef4444";
+        }
+        barContainer.appendChild(bar);
+        div.appendChild(barContainer);
+const feedbackDiv = document.createElement("div");
+      feedbackDiv.style.marginTop = "6px";
+      const likeBtn = document.createElement("button");
+      likeBtn.textContent = "👍";
+      likeBtn.style.cssText = "border:none;background:none;cursor:pointer;font-size:14px;margin-right:8px;";
+      likeBtn.onclick = () => sendFeedback("like", feedbackDiv);
+      const dislikeBtn = document.createElement("button");
+      dislikeBtn.textContent = "👎";
+      dislikeBtn.style.cssText = "border:none;background:none;cursor:pointer;font-size:14px;";
+      dislikeBtn.onclick = () => sendFeedback("dislike", feedbackDiv);
+      feedbackDiv.appendChild(likeBtn);
+      feedbackDiv.appendChild(dislikeBtn);
+      div.appendChild(feedbackDiv);
       }
     });
   } else {
@@ -248,7 +290,15 @@ async function startQuiz() {
   const res = await fetch("/api/quiz");
   const data = await res.json();
   currentQuizAnswer = data.answer;
-  addMessage("📝 Quiz zamani! Su konuyu kendi cumlelerinle aciklamayi dene:\n\n\"" + data.topic + "\"\n\nHazir oldugunda 'Cevabi Goster' yazip gonder.", "bot");
+  addMessage("📝 Quiz zamani! Su konuyu kendi cumlelerinle aciklamayi dene:\n\n\"" + data.topic + "\"\n\nHazir oldugunda 'Cevabı Göster' yazip gonder.", "bot");
+}
+async function sendFeedback(vote, container) {
+  await fetch("/api/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ vote: vote })
+  });
+  container.textContent = vote === "like" ? "Teşekkürler! 👍" : "Geri bildirim için teşekkürler 👎";
 }
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();

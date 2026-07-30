@@ -7,7 +7,7 @@ import random
 from foundry_local_sdk import Configuration, FoundryLocalManager
 import config
 
-stats = {"total_questions": 0, "answered": 0, "not_found": 0}
+stats = {"total_questions": 0, "answered": 0, "not_found": 0, "likes": 0, "dislikes": 0}
 answer_cache = {}
 
 logging.basicConfig(
@@ -142,6 +142,21 @@ def quiz():
     topic = first_sentence.replace("**", "")
 
     return jsonify({"topic": topic, "answer": content})
+@app.route("/api/feedback", methods=["POST"])
+def feedback():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"ok": False}), 400
+
+    vote = data.get("vote")
+    if vote == "like":
+        stats["likes"] += 1
+    elif vote == "dislike":
+        stats["dislikes"] += 1
+    else:
+        return jsonify({"ok": False}), 400
+
+    return jsonify({"ok": True})
 @app.route("/health")
 def health_check():
     try:
