@@ -8,6 +8,7 @@ from foundry_local_sdk import Configuration, FoundryLocalManager
 import config
 
 stats = {"total_questions": 0, "answered": 0, "not_found": 0}
+answer_cache = {}
 
 logging.basicConfig(
     filename=config.LOG_PATH,
@@ -39,6 +40,11 @@ def cosine_similarity(a, b):
 
 
 def answer_query(question, history):
+    cache_key = question.strip().lower()
+    if not history and cache_key in answer_cache:
+        cached = answer_cache[cache_key]
+        logging.info(f"SORU: {question} | ONBELLEKTEN DONDU")
+        return cached
     recent_history = history[-config.HISTORY_LENGTH:] if history else []
     expanded_query = " ".join(recent_history + [question])
 
@@ -78,6 +84,8 @@ def answer_query(question, history):
 
     stats["answered"] += 1
     logging.info(f"SORU: {question} | SKOR: {best_score:.3f} | KAYNAK: {source_label}")
+    if not history:
+        answer_cache[cache_key] = (context, best_score, source_label)
     return context, best_score, source_label
 
 
