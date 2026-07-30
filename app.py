@@ -101,6 +101,27 @@ def chat():
 @app.route("/stats")
 def get_stats():
     return jsonify(stats)
+@app.route("/health")
+def health_check():
+    try:
+        test_embedding = embed_client.generate_embedding("test").data[0].embedding
+        embedding_ok = len(test_embedding) > 0
+    except Exception:
+        embedding_ok = False
+
+    conn = sqlite3.connect(config.DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM documents")
+    doc_count = cursor.fetchone()[0]
+    conn.close()
+
+    status = "healthy" if embedding_ok and doc_count > 0 else "unhealthy"
+
+    return jsonify({
+        "status": status,
+        "embedding_model_ok": embedding_ok,
+        "documents_in_db": doc_count
+    })
 
 
 if __name__ == "__main__":
