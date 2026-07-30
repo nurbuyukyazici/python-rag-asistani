@@ -83,16 +83,32 @@ def answer_query(question, history):
 @app.route("/")
 def home():
     return render_template("index.html")
-
-
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    question = data.get("message", "").strip()
-    history = data.get("history", [])
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({"answer": "Gecersiz istek formati.", "score": 0}), 400
+
+    question = data.get("message", "")
+
+    if not isinstance(question, str):
+        return jsonify({"answer": "Soru metin formatinda olmali.", "score": 0}), 400
+
+    question = question.strip()
 
     if not question:
         return jsonify({"answer": "Lutfen bir soru yaz.", "score": 0})
+
+    if len(question) > config.MAX_QUESTION_LENGTH:
+        return jsonify({
+            "answer": f"Sorunuz cok uzun (maksimum {config.MAX_QUESTION_LENGTH} karakter).",
+            "score": 0
+        }), 400
+
+    history = data.get("history", [])
+    if not isinstance(history, list):
+        history = []
 
     answer, score, source = answer_query(question, history)
     return jsonify({"answer": answer, "score": round(score, 3), "source": source})
