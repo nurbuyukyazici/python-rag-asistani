@@ -3,14 +3,13 @@ import sqlite3
 import json
 import math
 import logging
-from datetime import datetime
 from foundry_local_sdk import Configuration, FoundryLocalManager
+import config
 
-SIMILARITY_THRESHOLD = 0.30
 stats = {"total_questions": 0, "answered": 0, "not_found": 0}
 
 logging.basicConfig(
-    filename="logs/app.log",
+    filename=config.LOG_PATH,
     level=logging.INFO,
     format="%(asctime)s - %(message)s",
     encoding="utf-8"
@@ -19,11 +18,11 @@ logging.basicConfig(
 app = Flask(__name__)
 
 print("Modeller yukleniyor, lutfen bekleyin...")
-config = Configuration(app_name="rag_projesi")
-FoundryLocalManager.initialize(config)
+fl_config = Configuration(app_name="rag_projesi")
+FoundryLocalManager.initialize(fl_config)
 manager = FoundryLocalManager.instance
 
-embed_model = manager.catalog.get_model("qwen3-embedding-0.6b")
+embed_model = manager.catalog.get_model(config.EMBEDDING_MODEL)
 embed_model.download()
 embed_model.load()
 embed_client = embed_model.get_embedding_client()
@@ -39,11 +38,11 @@ def cosine_similarity(a, b):
 
 
 def answer_query(question, history):
-    recent_history = history[-2:] if history else []
+    recent_history = history[-config.HISTORY_LENGTH:] if history else []
     expanded_query = " ".join(recent_history + [question])
 
     query_embedding = embed_client.generate_embedding(expanded_query).data[0].embedding
-    conn = sqlite3.connect("data/rag.db")
+    conn = sqlite3.connect(config.DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT content, embedding FROM documents")
     rows = cursor.fetchall()
@@ -57,7 +56,7 @@ def answer_query(question, history):
         score = cosine_similarity(query_embedding, embedding)
         content_lower = content.lower()
         keyword_matches = sum(1 for w in question_words if w in content_lower)
-        score += keyword_matches * 0.15
+        score += keyword_matches * config.KEYWORD_BONUS_WEIGHT
         scored.append((score, content))
 
     scored.sort(reverse=True)
@@ -65,7 +64,7 @@ def answer_query(question, history):
 
     stats["total_questions"] += 1
 
-    if best_score < SIMILARITY_THRESHOLD:
+    if best_score < config.SIMILARITY_THRESHOLD:
         stats["not_found"] += 1
         logging.info(f"SORU: {question} | SKOR: {best_score:.3f} | SONUC: BULUNAMADI")
         return "Bu bilgiyi dokumanlarimda bulamadim.", best_score, None
@@ -105,4 +104,4 @@ def get_stats():
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5000)
+    app.run(debug=config.FLASK_DEBUG, port=config.FLASK_PORT)

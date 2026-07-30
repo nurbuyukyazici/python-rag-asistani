@@ -1,0 +1,13 @@
+# Proje ayarlari
+
+SIMILARITY_THRESHOLD = 0.30
+KEYWORD_BONUS_WEIGHT = 0.15
+HISTORY_LENGTH = 2
+
+EMBEDDING_MODEL = "qwen3-embedding-0.6b"
+
+DATABASE_PATH = "data/rag.db"
+LOG_PATH = "logs/app.log"
+
+FLASK_PORT = 5000
+FLASK_DEBUG = False
