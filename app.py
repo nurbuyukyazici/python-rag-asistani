@@ -2,10 +2,19 @@ from flask import Flask, render_template, request, jsonify
 import sqlite3
 import json
 import math
+import logging
+from datetime import datetime
 from foundry_local_sdk import Configuration, FoundryLocalManager
 
 SIMILARITY_THRESHOLD = 0.30
 stats = {"total_questions": 0, "answered": 0, "not_found": 0}
+
+logging.basicConfig(
+    filename="logs/app.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s",
+    encoding="utf-8"
+)
 
 app = Flask(__name__)
 
@@ -58,6 +67,7 @@ def answer_query(question, history):
 
     if best_score < SIMILARITY_THRESHOLD:
         stats["not_found"] += 1
+        logging.info(f"SORU: {question} | SKOR: {best_score:.3f} | SONUC: BULUNAMADI")
         return "Bu bilgiyi dokumanlarimda bulamadim.", best_score, None
 
     context = scored[0][1]
@@ -67,6 +77,7 @@ def answer_query(question, history):
     source_label = first_sentence.replace("**", "")
 
     stats["answered"] += 1
+    logging.info(f"SORU: {question} | SKOR: {best_score:.3f} | KAYNAK: {source_label}")
     return context, best_score, source_label
 
 
