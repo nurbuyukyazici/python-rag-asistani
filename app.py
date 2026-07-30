@@ -3,6 +3,7 @@ import sqlite3
 import json
 import math
 import logging
+import random
 from foundry_local_sdk import Configuration, FoundryLocalManager
 import config
 
@@ -117,6 +118,22 @@ def chat():
 @app.route("/stats")
 def get_stats():
     return jsonify(stats)
+@app.route("/api/quiz")
+def quiz():
+    conn = sqlite3.connect(config.DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT content FROM documents")
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return jsonify({"topic": "", "answer": ""})
+
+    content = random.choice(rows)[0]
+    first_sentence = content.split(".")[0].strip()
+    topic = first_sentence.replace("**", "")
+
+    return jsonify({"topic": topic, "answer": content})
 @app.route("/health")
 def health_check():
     try:
